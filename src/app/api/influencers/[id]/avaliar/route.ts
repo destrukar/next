@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/src/app/lib/prisma';
+import type { NextRequest } from 'next/server';
+import type { RouteHandlerContext } from 'next/dist/server/future/route-modules/app-route/module';
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: RouteHandlerContext
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id);
     const data = await request.json();
 
     const updatedInfluencer = await prisma.influencer.update({
