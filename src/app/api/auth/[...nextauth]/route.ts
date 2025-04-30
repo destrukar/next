@@ -3,17 +3,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/src/app/lib/prisma";
 import { JWT } from "next-auth/jwt";
-import { Session, AdapterUser } from "next-auth";
-
-// Usando o tipo AdapterUser do NextAuth para evitar conflitos
-interface User extends AdapterUser {
-  id: string;
-  name: string | null | undefined;
-  email: string;
-}
+import { Session, User } from "next-auth";  // Corrigido aqui: use diretamente o tipo User do NextAuth
 
 interface CustomSession extends Session {
-  user: User;
+  user: User;  // Usando o tipo User diretamente
 }
 
 const authOptions = {
