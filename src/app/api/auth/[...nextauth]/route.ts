@@ -1,12 +1,4 @@
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
-import { JWT } from "next-auth/jwt";
-import { Session } from "next-auth";
-import { prisma } from "@/src/app/lib/prisma";
-
-
-export const authOptions = {
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -34,9 +26,9 @@ export const authOptions = {
   pages: {
     signIn: "/login",
   },
-  session: { strategy: "jwt" as const },
+  session: { strategy: "jwt" },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
       try {
         if (!user?.email) {
           console.error("Erro: E-mail do usuário não encontrado.");
@@ -60,21 +52,21 @@ export const authOptions = {
         return false;
       }
     },
-    async jwt({ token, user }: { token: JWT; user?: any }) {
+    async jwt({ token, user }) {
       if (user) token.user = user;
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
-      session.user = token.user as { name?: string | null; email?: string | null; image?: string | null };
+    async session({ session, token }) {
+      session.user = token.user;
       let user = await prisma.usuario.findFirst({
         where: {
           email: token?.user.email
-        }})
-        session.user.id=user?.id;
+        }
+      });
+      session.user.id = user?.id;
       return session;
     },
   },
-};
+});
 
-const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
