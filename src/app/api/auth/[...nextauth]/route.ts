@@ -1,10 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { JWT } from "next-auth/jwt";
-import { Session } from "next-auth";
 import { prisma } from "@/src/app/lib/prisma";
-
 
 export const authOptions = {
   providers: [
@@ -17,13 +14,13 @@ export const authOptions = {
       async authorize(credentials) {
         let user = await prisma.usuario.findFirst({
           where: {
-            email: credentials?.email
-          }
-        })
+            email: credentials?.email,
+          },
+        });
         if (user) {
           return { id: user.id, name: user.nome, email: user.email };
         }
-        return null
+        return null;
       },
     }),
     GoogleProvider({
@@ -34,7 +31,7 @@ export const authOptions = {
   pages: {
     signIn: "/login",
   },
-  session: { strategy: "jwt" as const },
+  session: { strategy: "jwt" },
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
@@ -68,13 +65,14 @@ export const authOptions = {
       session.user = token.user as { name?: string | null; email?: string | null; image?: string | null };
       let user = await prisma.usuario.findFirst({
         where: {
-          email: token?.user.email
-        }})
-        session.user.id=user?.id;
+          email: token?.user.email,
+        },
+      });
+      session.user.id = user?.id;
       return session;
     },
   },
 };
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+// Definindo o handler para a rota de autenticação
+export default NextAuth(authOptions);
