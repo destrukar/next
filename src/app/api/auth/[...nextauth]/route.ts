@@ -8,7 +8,7 @@ import { RequestInternal } from "next-auth";
 
 // Definindo o tipo User esperado pelo NextAuth
 interface User {
-  id: string;
+  id: string;  // Aqui mantivemos como string
   name: string;
   email: string;
 }
@@ -82,7 +82,6 @@ const authOptions = {
       return token;
     },
     async session({ session, token }: { session: CustomSession; token: JWT }) {
-      // Garantindo que o token.user tenha a estrutura do tipo `User`
       const user = token.user as User;
       
       session.user = user;
@@ -92,8 +91,8 @@ const authOptions = {
         },
       });
 
-      // Aqui o TypeScript agora sabe que `session.user` tem o `id` definido
-      session.user.id = userFromDb?.id;
+      // Aqui, convertendo `userFromDb?.id` para string para evitar o erro
+      session.user.id = String(userFromDb?.id);
 
       return session;
     },
