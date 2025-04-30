@@ -1,24 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/src/app/lib/prisma';
+import { prisma } from "@/src/app/lib/prisma";
+import { NextResponse } from "next/server";
 
-// Ajustando a assinatura da função para compatibilidade com o Next.js 13+
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const id = parseInt(params.id);
+  const { avaliacao } = await req.json();
+
+  if (isNaN(avaliacao)) {
+    return new NextResponse("Nota inválida", { status: 400 });
+  }
+
   try {
-    const { id } = params;  // Aqui pegamos o ID diretamente dos parâmetros
-
-    // Lê os dados da requisição
-    const data = await request.json();
-
-    // Atualiza o influencer no banco de dados usando o ID da rota
-    const updatedInfluencer = await prisma.influencer.update({
-      where: { id: parseInt(id) },  // Garantindo que o ID seja inteiro
-      data,  // Atualizando com os dados recebidos
+    await prisma.avaliacao.create({
+      data: {
+        nota: avaliacao,
+        influencerId: id,
+      },
     });
 
-    // Retorna a resposta com o influencer atualizado
-    return NextResponse.json(updatedInfluencer, { status: 200 });
+    return new NextResponse("Avaliação registrada", { status: 200 });
   } catch (error) {
-    console.error('Erro ao atualizar o influencer', error);
-    return NextResponse.json({ error: 'Erro ao atualizar influencer' }, { status: 500 });
+    console.error("Erro ao registrar avaliação:", error);
+    return new NextResponse("Erro interno", { status: 500 });
   }
 }

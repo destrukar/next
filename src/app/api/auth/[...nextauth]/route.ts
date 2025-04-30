@@ -1,10 +1,12 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import { JWT } from "next-auth/jwt";
+import { Session } from "next-auth";
 import { prisma } from "@/src/app/lib/prisma";
 
-// Define a função NextAuth diretamente
-const handler = NextAuth({
+
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -13,14 +15,15 @@ const handler = NextAuth({
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        const user = await prisma.usuario.findFirst({
-          where: { email: credentials?.email },
-        });
-
+        let user = await prisma.usuario.findFirst({
+          where: {
+            email: credentials?.email
+          }
+        })
         if (user) {
           return { id: user.id, name: user.nome, email: user.email };
         }
-        return null;
+        return null
       },
     }),
     GoogleProvider({
@@ -29,17 +32,16 @@ const handler = NextAuth({
     }),
   ],
   pages: {
-    signIn: "/login", // Página personalizada de login
+    signIn: "/login",
   },
   session: { strategy: "jwt" as const },
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, account, profile }) {
       try {
         if (!user?.email) {
           console.error("Erro: E-mail do usuário não encontrado.");
           return false;
         }
-
         let existingUser = await prisma.usuario.findUnique({
           where: { email: user.email },
         });
@@ -52,27 +54,27 @@ const handler = NextAuth({
             },
           });
         }
-
         return true;
       } catch (error) {
         console.error("Erro ao salvar usuário:", error);
         return false;
       }
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: any }) {
       if (user) token.user = user;
       return token;
     },
-    async session({ session, token }) {
-      session.user = token.user;
-      const user = await prisma.usuario.findFirst({
-        where: { email: token?.user.email },
-      });
-      session.user.id = user?.id;
+    async session({ session, token }: { session: Session; token: JWT }) {
+      session.user = token.user as { name?: string | null; email?: string | null; image?: string | null };
+      let user = await prisma.usuario.findFirst({
+        where: {
+          email: token?.user.email
+        }})
+        session.user.id=user?.id;
       return session;
     },
   },
-});
+};
 
-// Exportando a função handler do NextAuth
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
