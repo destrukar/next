@@ -13,6 +13,10 @@ export async function DELETE(_: Request, { params }: Params) {
   }
 
   try {
+    await prisma.avaliacao.deleteMany({
+      where: { influencerId: id },
+    });
+
     await prisma.influencer.delete({
       where: { id },
     });

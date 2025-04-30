@@ -37,7 +37,7 @@ model Influencer {
 model Avaliacao {
   id           Int        @id @default(autoincrement())
   nota         Float
-  influencer   Influencer @relation(fields: [influencerId], references: [id])
+  influencer   Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
   influencerId Int
 }
 
