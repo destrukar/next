@@ -1,11 +1,7 @@
 import { prisma } from "@/src/app/lib/prisma";
 import { NextResponse } from "next/server";
 
-interface Params {
-  params: { id: string };
-}
-
-export async function DELETE(_: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const id = Number(params.id);
 
   if (isNaN(id)) {
@@ -13,10 +9,12 @@ export async function DELETE(_: Request, { params }: Params) {
   }
 
   try {
+    // Deleta as avaliações associadas ao influencer
     await prisma.avaliacao.deleteMany({
       where: { influencerId: id },
     });
 
+    // Deleta o influencer
     await prisma.influencer.delete({
       where: { id },
     });
@@ -27,3 +25,4 @@ export async function DELETE(_: Request, { params }: Params) {
     return NextResponse.json({ erro: "Erro ao excluir influencer" }, { status: 500 });
   }
 }
+
