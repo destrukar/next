@@ -4,11 +4,17 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
+interface Influencer {
+  id: number;
+  conteudo: string;
+  mediaAvaliacao: number | null;
+  createdAt: string;
+}
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [influencers, setInfluencers] = useState([]);
-
+  const [influencers, setInfluencers] = useState<Influencer[]>([]);
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
