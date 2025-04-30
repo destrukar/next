@@ -3,8 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/src/app/lib/prisma";
 
-// Definindo as opções de autenticação diretamente dentro do handler
-export const handler = NextAuth({
+// Definir as opções diretamente dentro da função NextAuth
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -73,7 +73,8 @@ export const handler = NextAuth({
       return session;
     },
   },
-});
+};
 
-// Exportando o handler para a rota
-export default handler;
+// A função NextAuth já se encarrega de lidar com a autenticação
+export { authOptions };
+export default NextAuth(authOptions);
