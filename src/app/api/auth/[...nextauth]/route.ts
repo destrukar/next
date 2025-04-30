@@ -6,6 +6,13 @@ import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 import { RequestInternal } from "next-auth";
 
+// Definindo o tipo User esperado pelo NextAuth
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 // Configuração do NextAuth
 const authOptions = {
   providers: [
@@ -18,17 +25,18 @@ const authOptions = {
       async authorize(
         credentials: Record<"email" | "password", string> | undefined,
         req: Pick<RequestInternal, "method" | "query" | "body" | "headers">
-      ) {
+      ): Promise<User | null> {
         const user = await prisma.usuario.findFirst({
           where: {
             email: credentials?.email,
           },
         });
-    
+
         if (user) {
-          return { id: user.id, name: user.nome, email: user.email };
+          // Garantindo que o ID seja um string, como esperado
+          return { id: String(user.id), name: user.nome, email: user.email };
         }
-    
+
         return null;
       },
     }),
@@ -81,7 +89,7 @@ const authOptions = {
   },
 };
 
-// 👇 Esta é a parte ESSENCIAL: exportar os métodos HTTP para o Next.js reconhecer
+// 👇 Exportando os métodos HTTP para o Next.js reconhecer
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
