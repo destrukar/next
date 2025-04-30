@@ -74,5 +74,5 @@ export const authOptions = {
   },
 };
 
-// Definindo o handler para a rota de autenticação
-export default NextAuth(authOptions);
+// Exporte o manipulador da rota para o NextAuth
+export const handler = NextAuth(authOptions);
