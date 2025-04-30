@@ -13,6 +13,11 @@ interface User {
   email: string;
 }
 
+// Tipando a sessão para garantir que `session.user` tem a propriedade `id`
+interface CustomSession extends Session {
+  user: User;
+}
+
 const authOptions = {
   providers: [
     CredentialsProvider({
@@ -48,7 +53,6 @@ const authOptions = {
   },
   session: { strategy: "jwt" as const },
   callbacks: {
-    // Tipando explicitamente o parâmetro `user`
     async signIn({ user }: { user: User }) {
       try {
         if (!user?.email) return false;
@@ -77,8 +81,8 @@ const authOptions = {
       }
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
-      // Fazendo o type assertion para garantir que token.user seja do tipo User
+    async session({ session, token }: { session: CustomSession; token: JWT }) {
+      // Garantindo que o token.user tenha a estrutura do tipo `User`
       const user = token.user as User;
       
       session.user = user;
@@ -87,7 +91,10 @@ const authOptions = {
           email: user.email,
         },
       });
+
+      // Aqui o TypeScript agora sabe que `session.user` tem o `id` definido
       session.user.id = userFromDb?.id;
+
       return session;
     },
   },
