@@ -46,15 +46,18 @@ const authOptions = {
     async signIn({ user }: { user: User }) {
       try {
         if (!user?.email) return false;
-
+    
         let existingUser = await prisma.usuario.findUnique({
           where: { email: user.email },
         });
-
+    
+        // Verifica se o nome do usuário não é nulo ou indefinido e usa um valor padrão caso seja
+        const userName = user.name || "Nome padrão"; // Use um nome padrão ou algo relevante
+    
         if (!existingUser) {
           await prisma.usuario.create({
             data: {
-              nome: user.name,
+              nome: userName,  // Passa o nome verificado
               email: user.email,
             },
           });
@@ -64,7 +67,7 @@ const authOptions = {
         console.error("Erro no signIn:", error);
         return false;
       }
-    },
+    }
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
         token.user = user;
