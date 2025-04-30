@@ -1,22 +1,23 @@
-import { prisma } from "@/src/app/lib/prisma";
 import { NextResponse } from "next/server";
+import { prisma } from "@/src/app/lib/prisma";
+import { NextRequest } from "next/server";
 
-interface Params {
-  params: { id: string };
-}
-
-export async function DELETE(_: Request, { params }: Params) {
-  const id = Number(params.id);
+export async function DELETE(request: NextRequest) {
+  // Extrai o ID da URL: /api/influencers/[id]
+  const pathParts = request.nextUrl.pathname.split("/");
+  const id = Number(pathParts[pathParts.indexOf("influencers") + 1]);
 
   if (isNaN(id)) {
     return NextResponse.json({ erro: "ID inválido" }, { status: 400 });
   }
 
   try {
+    // Deleta as avaliações associadas ao influencer
     await prisma.avaliacao.deleteMany({
       where: { influencerId: id },
     });
 
+    // Deleta o influencer
     await prisma.influencer.delete({
       where: { id },
     });
