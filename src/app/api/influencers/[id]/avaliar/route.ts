@@ -1,24 +1,26 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/src/app/lib/prisma';
-import type { NextRequest } from 'next/server';
-import type { RouteHandlerContext } from 'next/dist/server/future/route-modules/app-route/module';
+import { prisma } from "@/src/app/lib/prisma";
+import { NextResponse } from "next/server";
 
-export async function PUT(
-  request: Request,
-  context: RouteHandlerContext
-) {
+
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const id = parseInt(params.id);
+  const { avaliacao } = await req.json();
+
+  if (isNaN(avaliacao)) {
+    return new NextResponse("Nota inválida", { status: 400 });
+  }
+
   try {
-    const id = parseInt(context.params.id);
-    const data = await request.json();
-
-    const updatedInfluencer = await prisma.influencer.update({
-      where: { id },
-      data,
+    await prisma.avaliacao.create({
+      data: {
+        nota: avaliacao,
+        influencerId: id,
+      },
     });
 
-    return NextResponse.json(updatedInfluencer, { status: 200 });
+    return new NextResponse("Avaliação registrada", { status: 200 });
   } catch (error) {
-    console.error('Erro ao atualizar o influencer', error);
-    return NextResponse.json({ error: 'Erro ao atualizar influencer' }, { status: 500 });
+    console.error("Erro ao registrar avaliação:", error);
+    return new NextResponse("Erro interno", { status: 500 });
   }
 }
