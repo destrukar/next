@@ -1,9 +1,12 @@
-import { prisma } from "@/src/app/lib/prisma";
 import { NextResponse } from "next/server";
+import { prisma } from "@/src/app/lib/prisma";
+import { NextRequest } from "next/server";
 
+export async function PUT(req: NextRequest) {
+  // Extrai o ID da URL: /api/influencers/[id]/avaliar
+  const pathParts = req.nextUrl.pathname.split("/");
+  const id = parseInt(pathParts[pathParts.indexOf("influencers") + 1]);
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id);
   const { avaliacao } = await req.json();
 
   if (isNaN(avaliacao)) {
