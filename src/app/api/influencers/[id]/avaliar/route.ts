@@ -1,26 +1,24 @@
-import { prisma } from "@/src/app/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/src/app/lib/prisma';
 
-
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id);
-  const { avaliacao } = await req.json();
-
-  if (isNaN(avaliacao)) {
-    return new NextResponse("Nota inválida", { status: 400 });
-  }
-
+// Exemplo de método PUT para a rota dinâmica
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    await prisma.avaliacao.create({
-      data: {
-        nota: avaliacao,
-        influencerId: id,
-      },
+    // Pegue o ID do parâmetro
+    const { id } = params;
+
+    // Aqui você pode processar a requisição PUT e usar o `id` para atualizar os dados
+    const data = await request.json(); // Pegando os dados do corpo da requisição
+
+    // Exemplo de atualização de um influencer no banco de dados
+    const updatedInfluencer = await prisma.influencer.update({
+      where: { id: parseInt(id) }, // Usando o ID da rota dinâmica
+      data: data, // Atualize com os dados recebidos
     });
 
-    return new NextResponse("Avaliação registrada", { status: 200 });
+    return NextResponse.json(updatedInfluencer, { status: 200 });
   } catch (error) {
-    console.error("Erro ao registrar avaliação:", error);
-    return new NextResponse("Erro interno", { status: 500 });
+    console.error('Erro ao atualizar influencer:', error);
+    return NextResponse.json({ error: 'Erro ao atualizar influencer' }, { status: 500 });
   }
 }
