@@ -14,7 +14,10 @@ const authOptions = {
         email: { label: "E-mail", type: "email" },
         password: { label: "Senha", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(
+        credentials: Record<"email" | "password", string> | undefined,
+        req: any
+      ) {
         const user = await prisma.usuario.findFirst({
           where: {
             email: credentials?.email,
