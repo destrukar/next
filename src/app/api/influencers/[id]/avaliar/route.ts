@@ -18,4 +18,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     // Retorna a resposta com o influencer atualizado
     return NextResponse.json(updatedInfluencer, { status: 200 });
   } catch (error) {
-    console.error('Erro
+    console.error('Erro ao atualizar o influencer', error);
+    return NextResponse.json({ error: 'Erro ao atualizar influencer' }, { status: 500 });
+  }
+}
