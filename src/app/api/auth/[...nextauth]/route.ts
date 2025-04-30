@@ -72,17 +72,22 @@ const authOptions = {
       }
     },
     async jwt({ token, user }: { token: JWT; user?: User }) {
-      if (user) token.user = user;
+      if (user) {
+        token.user = user;
+      }
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      session.user = token.user as any;
-      const user = await prisma.usuario.findFirst({
+      // Fazendo o type assertion para garantir que token.user seja do tipo User
+      const user = token.user as User;
+      
+      session.user = user;
+      const userFromDb = await prisma.usuario.findFirst({
         where: {
-          email: token.user.email,
+          email: user.email,
         },
       });
-      session.user.id = user?.id;
+      session.user.id = userFromDb?.id;
       return session;
     },
   },
