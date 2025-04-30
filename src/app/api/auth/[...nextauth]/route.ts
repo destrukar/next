@@ -3,8 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/src/app/lib/prisma";
 
-// Define the authentication options
-export const authOptions = {
+// Define a função NextAuth diretamente
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -14,7 +14,7 @@ export const authOptions = {
       },
       async authorize(credentials) {
         const user = await prisma.usuario.findFirst({
-          where: { email: credentials?.email }
+          where: { email: credentials?.email },
         });
 
         if (user) {
@@ -29,7 +29,7 @@ export const authOptions = {
     }),
   ],
   pages: {
-    signIn: "/login", // Custom sign-in page
+    signIn: "/login", // Página personalizada de login
   },
   session: { strategy: "jwt" as const },
   callbacks: {
@@ -39,7 +39,7 @@ export const authOptions = {
           console.error("Erro: E-mail do usuário não encontrado.");
           return false;
         }
-        
+
         let existingUser = await prisma.usuario.findUnique({
           where: { email: user.email },
         });
@@ -72,8 +72,7 @@ export const authOptions = {
       return session;
     },
   },
-};
+});
 
-// Export the NextAuth handler using GET and POST
-const handler = NextAuth(authOptions);
+// Exportando a função handler do NextAuth
 export { handler as GET, handler as POST };
