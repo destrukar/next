@@ -4,9 +4,17 @@ import Link from "next/link";
 import { prisma } from "../../lib/prisma";
 import { useEffect, useState } from "react";
 
+interface Influencer {
+  id: number;
+  conteudo: string;
+  mediaAvaliacao: number;
+  createdAt: string;
+  comentarios: any[]; // ou tipar melhor se souber a estrutura dos comentários
+}
+
 
 export default function InfluencerList() {
-  const [influencers, setInfluencers] = useState([]);
+  const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const fetchInfluencers = async () => {
     try {
       const response = await fetch("/api/influencers");
