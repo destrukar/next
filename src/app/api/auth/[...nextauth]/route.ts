@@ -3,17 +3,15 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/src/app/lib/prisma";
 import { JWT } from "next-auth/jwt";
-import { Session } from "next-auth";
-import { RequestInternal } from "next-auth";
+import { Session, AdapterUser } from "next-auth";
 
-// Definindo o tipo User esperado pelo NextAuth
-interface User {
-  id: string;  // Aqui mantivemos como string
-  name: string;
+// Usando o tipo AdapterUser do NextAuth para evitar conflitos
+interface User extends AdapterUser {
+  id: string;
+  name: string | null | undefined;
   email: string;
 }
 
-// Tipando a sessão para garantir que `session.user` tem a propriedade `id`
 interface CustomSession extends Session {
   user: User;
 }
@@ -27,8 +25,7 @@ const authOptions = {
         password: { label: "Senha", type: "password" },
       },
       async authorize(
-        credentials: Record<"email" | "password", string> | undefined,
-        req: Pick<RequestInternal, "method" | "query" | "body" | "headers">
+        credentials: Record<"email" | "password", string> | undefined
       ): Promise<User | null> {
         const user = await prisma.usuario.findFirst({
           where: {
@@ -83,7 +80,7 @@ const authOptions = {
     },
     async session({ session, token }: { session: CustomSession; token: JWT }) {
       const user = token.user as User;
-      
+
       session.user = user;
       const userFromDb = await prisma.usuario.findFirst({
         where: {
@@ -91,7 +88,6 @@ const authOptions = {
         },
       });
 
-      // Aqui, convertendo `userFromDb?.id` para string para evitar o erro
       session.user.id = String(userFromDb?.id);
 
       return session;
