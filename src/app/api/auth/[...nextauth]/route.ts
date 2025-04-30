@@ -13,7 +13,6 @@ interface User {
   email: string;
 }
 
-// Configuração do NextAuth
 const authOptions = {
   providers: [
     CredentialsProvider({
@@ -33,7 +32,6 @@ const authOptions = {
         });
 
         if (user) {
-          // Garantindo que o ID seja um string, como esperado
           return { id: String(user.id), name: user.nome, email: user.email };
         }
 
@@ -50,7 +48,8 @@ const authOptions = {
   },
   session: { strategy: "jwt" as const },
   callbacks: {
-    async signIn({ user }) {
+    // Tipando explicitamente o parâmetro `user`
+    async signIn({ user }: { user: User }) {
       try {
         if (!user?.email) return false;
 
@@ -72,7 +71,7 @@ const authOptions = {
         return false;
       }
     },
-    async jwt({ token, user }: { token: JWT; user?: any }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) token.user = user;
       return token;
     },
@@ -89,7 +88,6 @@ const authOptions = {
   },
 };
 
-// 👇 Exportando os métodos HTTP para o Next.js reconhecer
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
