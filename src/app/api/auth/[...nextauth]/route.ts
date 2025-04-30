@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/src/app/lib/prisma";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
+import { RequestInternal } from "next-auth";
 
 // Configuração do NextAuth
 const authOptions = {
@@ -16,16 +17,18 @@ const authOptions = {
       },
       async authorize(
         credentials: Record<"email" | "password", string> | undefined,
-        req: any
+        req: Pick<RequestInternal, "method" | "query" | "body" | "headers">
       ) {
         const user = await prisma.usuario.findFirst({
           where: {
             email: credentials?.email,
           },
         });
+    
         if (user) {
           return { id: user.id, name: user.nome, email: user.email };
         }
+    
         return null;
       },
     }),
