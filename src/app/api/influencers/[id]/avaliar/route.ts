@@ -1,21 +1,22 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/src/app/lib/prisma';
 
-// Exemplo de método PUT para a rota dinâmica
+// Definindo a função PUT corretamente com o tipo de parâmetros
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    // Pegue o ID do parâmetro
+    // Acessando o parâmetro 'id' diretamente
     const { id } = params;
 
-    // Aqui você pode processar a requisição PUT e usar o `id` para atualizar os dados
-    const data = await request.json(); // Pegando os dados do corpo da requisição
+    // Obtendo os dados do corpo da requisição
+    const data = await request.json();
 
-    // Exemplo de atualização de um influencer no banco de dados
+    // Atualizando o influencer no banco de dados usando o ID da rota
     const updatedInfluencer = await prisma.influencer.update({
-      where: { id: parseInt(id) }, // Usando o ID da rota dinâmica
-      data: data, // Atualize com os dados recebidos
+      where: { id: parseInt(id) }, // Usando o ID como inteiro
+      data: data, // Atualizando com os dados recebidos
     });
 
+    // Retornando a resposta em formato JSON
     return NextResponse.json(updatedInfluencer, { status: 200 });
   } catch (error) {
     console.error('Erro ao atualizar influencer:', error);
